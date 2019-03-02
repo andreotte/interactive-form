@@ -180,7 +180,6 @@ $payment.on('change', function() {
 
 
 $submit.on('click', function(){
-  event.preventDefault();
   // Reset backgrounds if they have been turned red proviously
   $('.activities legend').css('background-color', '');
 
@@ -193,18 +192,21 @@ $submit.on('click', function(){
 
   if(! workshopChecked.includes('checked')) {
     $('.activities legend').css('background-color', 'red');
+    event.preventDefault();
+
   }
 
   function regexTester (regex, string) {
     return regex.test(string.val());
   }
+
   for (i = 0; i < regexArray.length; i ++) {
     // Reset backgrounds if they have been turned red proviously
     fieldValidatorArray[i].css('border-color', '');
-    if(regexTester(regexArray[i], fieldValidatorArray[i])) {
-        console.log('true!');
-    } else {
+    if(! regexTester(regexArray[i], fieldValidatorArray[i])) {
       fieldValidatorArray[i].css('border-color', 'red');
+      event.preventDefault();
     }
   }
+
 });
