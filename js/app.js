@@ -1,19 +1,18 @@
 //script file
-
+// jQuery objects
 const $name = $('#name');
 const $email = $('#mail');
 const $jobTitle = $("#title");
 const $shirtDesign = $('#design');
-const $shirtColors = $('#color');
-const $colorsChildren = $shirtColors.children();
+const $colorDiv = $('#colors-js-puns');
+const $shirtColors = $('#color').children();
 const $workshopFieldset = $('.activities');
-
+const $activitiesLegend = $('.activities legend');
 const $workshops = $workshopFieldset.children().children();
 const $payment = $('#payment');
 const $creditCardString = $('#cc-num');
 const $zipCode = $('#zip');
 const $cvv = $('#cvv');
-
 const $creditDiv = $('#credit-card');
 const $bitcoinDiv = $('#bitcoin');
 const $paypalDiv = $('#paypal');
@@ -23,17 +22,26 @@ const emailRegex = /^\S+@\S+\.\S+$/;
 const creditcardRegex = /^\d{13,16}$/g;
 const zipcodeRegex = /^\d{5}$/;
 const cvvRegex = /^\d{3}$/;
-//const $creditCardNumber = $creditCardString.val().replace(/\D/g,'');
-const regexArray = [nameRegex, emailRegex];
-const fieldValidatorArray = [$name, $email];
-const workshopChecked = [];
+let regexArray = [nameRegex, emailRegex];
+let fieldValidatorArray = [$name, $email];
+let workshopChecked = [];
 const $submit = $('button');
 
+const $mailLabel = $( "[for='mail']");
+$mailLabel.append('<h5 id="mail-error">must be formatted: string@string.string</h5>');
+const $mailError = $('#mail-error');
+
+$activitiesLegend.append('<h6 id="workshops-error">Select at least one workshop</h6>')
+const $workshopsError = $('#workshops-error');
+$workshopsError.hide();
+
 // On page load, hide other 'Role' text input field in 'Basic' fieldset and add
-// total cost field at the end of workshops section. Hide the bitcoin and PayPal
-// divs
+// total cost field at the end of workshops section. Hide t-shirt design. Hide
+//the bitcoin and PayPal divs
 $jobTitle.next().hide();
 $jobTitle.next().next().hide();
+$colorDiv.hide();
+$mailError.hide();
 $workshopFieldset.append('<div id="total_cost"><h3>Total Cost: $0</h3></div>');
 $bitcoinDiv.hide();
 $paypalDiv.hide();
@@ -55,20 +63,21 @@ $jobTitle.on('change', function(){
 // TODO: when a design selection is made then color is changed -- design
 // options don't change until the dropdown is selected.
 $shirtDesign.on('change', function(){
-  $colorsChildren.show();
-  for (i = 1; i < $colorsChildren.length; i++) {
+  $colorDiv.show();
+  $shirtColors.show();
+  for (i = 1; i < $shirtColors.length; i++) {
     if ($shirtDesign.eq(0).val() === 'js puns'){
-      if ($colorsChildren.eq(i).val() === 'tomato' ||
-          $colorsChildren.eq(i).val() === 'steelblue' ||
-          $colorsChildren.eq(i).val() === 'dimgrey') {
-        $colorsChildren.eq(i).hide();
+      if ($shirtColors.eq(i).val() === 'tomato' ||
+          $shirtColors.eq(i).val() === 'steelblue' ||
+          $shirtColors.eq(i).val() === 'dimgrey') {
+        $shirtColors.eq(i).hide();
       }
     } else if ($shirtDesign.eq(0).val() === 'heart js') {
 
-      if ($colorsChildren.eq(i).val() === 'cornflowerblue' ||
-          $colorsChildren.eq(i).val() === 'darkslategrey' ||
-          $colorsChildren.eq(i).val() === 'gold') {
-        $colorsChildren.eq(i).hide();
+      if ($shirtColors.eq(i).val() === 'cornflowerblue' ||
+          $shirtColors.eq(i).val() === 'darkslategrey' ||
+          $shirtColors.eq(i).val() === 'gold') {
+        $shirtColors.eq(i).hide();
       }
     }
   }
@@ -141,6 +150,8 @@ $workshops.on('change', function() {
 
 // TODO: on change function with if statements using .hide() method
 $payment.on('change', function() {
+  let regexArray = [nameRegex, emailRegex];
+  let fieldValidatorArray = [$name, $email];
   if($payment.val() === 'credit card') {
     $bitcoinDiv.hide();
     $paypalDiv.hide();
@@ -177,13 +188,19 @@ $payment.on('change', function() {
   }
 });
 
+$email.on('keypress',function() {
+  $email.val() === '';
+  if (! emailRegex.test($email.val())) {
+    $mailError.show();
+  } else {
+    $mailError.hide();
+  }
+});
 
-
-$submit.on('click', function(){
+$submit.on('click', function() {
   // Reset backgrounds if they have been turned red proviously
-  $('.activities legend').css('background-color', '');
-
-
+  $activitiesLegend.css('background-color', '');
+  workshopChecked = [];
   for (i = 0; i < $workshops.length; i ++) {
     if ($workshops.eq(i).prop('checked')) {
       workshopChecked.push('checked');
@@ -191,9 +208,11 @@ $submit.on('click', function(){
   }
 
   if(! workshopChecked.includes('checked')) {
-    $('.activities legend').css('background-color', 'red');
+    $activitiesLegend.css('background-color', 'red');
+    $workshopsError.show();
     event.preventDefault();
-
+  } else {
+    $workshopsError.hide();
   }
 
   function regexTester (regex, string) {
