@@ -9,9 +9,12 @@ const $workshopFieldset = $('.activities');
 // Object containing node list of workshops
 const $workshops = $workshopFieldset.children().children();
 
-// On page load, hide other 'Role' text input field in 'Basic' fieldset
+
+// On page load, hide other 'Role' text input field in 'Basic' fieldset and add
+// total cost field at the end of workshops section.
 $jobTitle.next().hide();
 $jobTitle.next().next().hide();
+$workshopFieldset.append('<div id="total_cost"><h3>Total Cost: $0</h3></div>');
 
 // When selections are made from 'Job Role' field, hide/display 'Role' text
 // input field as appropriate
@@ -52,6 +55,12 @@ $shirtDesign.on('change', function(){
 // On select/deselect actions for workshops, check for conflicting $workshops
 // and disable schedule conflicts
 $workshops.on('change', function() {
+  let totalCost = 0;
+  const $costDiv = $('#total_cost');
+  // Objects representing workshops that do not have conflicts
+  const $main = $("[name = 'all']");
+  const $buildTools = $("[name = 'build-tools']");
+  const $npm = $("[name = 'npm']");
   // Objects representing workshops that have conflicts:
     // Tuesday monrning conflicts
   const $jsFrameworks = $("[name = 'js-frameworks']");
@@ -64,6 +73,7 @@ $workshops.on('change', function() {
   if (this['name'] === 'js-frameworks') {
     if ($express.prop("disabled")) {
       $express.prop("disabled", false);
+
     } else {
       $express.prop("disabled", true);
     }
@@ -89,4 +99,29 @@ $workshops.on('change', function() {
         $jsLibs.prop("disabled", true);
       }
   }
+
+  function isChecked(workshop, price) {
+    if (workshop.prop('checked')) {
+      totalCost += price;
+    }
+  }
+
+  isChecked($main, 200);
+  isChecked($npm, 100);
+  isChecked($jsFrameworks, 100);
+  isChecked($express, 100);
+  isChecked($jsLibs, 100);
+  isChecked($node, 100);
+  isChecked($buildTools, 100);
+
+  // set the html of $costDiv to reflect totalCost
+  $costDiv.html('<h3>Total Cost: $' + totalCost + '</h3>');
 });
+
+// Objects representing payment option divs
+
+const creditDiv = $('#credit-card');
+const bitcoinDiv = $('#bitcoin');
+const paypalDiv = $('#paypal');
+
+//// TODO: on change function with if statements using .hide() method
