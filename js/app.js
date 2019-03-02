@@ -1,19 +1,33 @@
 //script file
 
-
+const $name = $('#name');
+const $email = $('#mail');
 const $jobTitle = $("#title");
 const $shirtDesign = $('#design');
 const $shirtColors = $('#color');
 const $colorsChildren = $shirtColors.children();
 const $workshopFieldset = $('.activities');
-// Object containing node list of workshops
+
 const $workshops = $workshopFieldset.children().children();
 const $payment = $('#payment');
-// Objects representing payment option divs
+const $creditCardString = $('#cc-num');
+const $zipCode = $('#zip');
+const $cvv = $('#cvv');
+
 const $creditDiv = $('#credit-card');
 const $bitcoinDiv = $('#bitcoin');
 const $paypalDiv = $('#paypal');
 
+const nameRegex = /.+/;
+const emailRegex = /^\S+@\S+\.\S+$/;
+const creditcardRegex = /^\d{13,16}$/g;
+const zipcodeRegex = /^\d{5}$/;
+const cvvRegex = /^\d{3}$/;
+//const $creditCardNumber = $creditCardString.val().replace(/\D/g,'');
+const regexArray = [nameRegex, emailRegex];
+const fieldValidatorArray = [$name, $email];
+const workshopChecked = [];
+const $submit = $('button');
 
 // On page load, hide other 'Role' text input field in 'Basic' fieldset and add
 // total cost field at the end of workshops section. Hide the bitcoin and PayPal
@@ -121,11 +135,9 @@ $workshops.on('change', function() {
   isChecked($jsLibs, 100);
   isChecked($node, 100);
   isChecked($buildTools, 100);
-
   // set the html of $costDiv to reflect totalCost
   $costDiv.html('<h3>Total Cost: $' + totalCost + '</h3>');
 });
-
 
 // TODO: on change function with if statements using .hide() method
 $payment.on('change', function() {
@@ -133,16 +145,66 @@ $payment.on('change', function() {
     $bitcoinDiv.hide();
     $paypalDiv.hide();
     $creditDiv.show();
+    regexArray.push(creditcardRegex);
+    regexArray.push(zipcodeRegex);
+    regexArray.push(cvvRegex);
+    fieldValidatorArray.push($creditCardString);
+    fieldValidatorArray.push($zipCode);
+    fieldValidatorArray.push($cvv);
+
   } else if ($payment.val() === 'bitcoin') {
     $creditDiv.hide();
     $paypalDiv.hide();
     $bitcoinDiv.show();
+    regexArray.pop(creditcardRegex);
+    regexArray.pop(zipcodeRegex);
+    regexArray.pop(cvvRegex);
+    fieldValidatorArray.pop($creditCardString);
+    fieldValidatorArray.pop($zipCode);
+    fieldValidatorArray.pop($cvv);
+
   } else if ($payment.val() === 'paypal') {
     $creditDiv.hide();
     $bitcoinDiv.hide();
     $paypalDiv.show();
+    regexArray.pop(creditcardRegex);
+    regexArray.pop(zipcodeRegex);
+    regexArray.pop(cvvRegex);
+    fieldValidatorArray.pop($creditCardString);
+    fieldValidatorArray.pop($zipCode);
+    fieldValidatorArray.pop($cvv);
   } else {
+  }
+});
 
+
+
+$submit.on('click', function(){
+  event.preventDefault();
+  // Reset backgrounds if they have been turned red proviously
+  $('.activities legend').css('background-color', '');
+
+
+  for (i = 0; i < $workshops.length; i ++) {
+    if ($workshops.eq(i).prop('checked')) {
+      workshopChecked.push('checked');
+    }
   }
 
+  if(! workshopChecked.includes('checked')) {
+    $('.activities legend').css('background-color', 'red');
+  }
+
+  function regexTester (regex, string) {
+    return regex.test(string.val());
+  }
+  for (i = 0; i < regexArray.length; i ++) {
+    // Reset backgrounds if they have been turned red proviously
+    fieldValidatorArray[i].css('border-color', '');
+    if(regexTester(regexArray[i], fieldValidatorArray[i])) {
+        console.log('true!');
+    } else {
+      fieldValidatorArray[i].css('border-color', 'red');
+    }
+  }
 });
