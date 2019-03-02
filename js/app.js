@@ -8,13 +8,21 @@ const $colorsChildren = $shirtColors.children();
 const $workshopFieldset = $('.activities');
 // Object containing node list of workshops
 const $workshops = $workshopFieldset.children().children();
+const $payment = $('#payment');
+// Objects representing payment option divs
+const $creditDiv = $('#credit-card');
+const $bitcoinDiv = $('#bitcoin');
+const $paypalDiv = $('#paypal');
 
 
 // On page load, hide other 'Role' text input field in 'Basic' fieldset and add
-// total cost field at the end of workshops section.
+// total cost field at the end of workshops section. Hide the bitcoin and PayPal
+// divs
 $jobTitle.next().hide();
 $jobTitle.next().next().hide();
 $workshopFieldset.append('<div id="total_cost"><h3>Total Cost: $0</h3></div>');
+$bitcoinDiv.hide();
+$paypalDiv.hide();
 
 // When selections are made from 'Job Role' field, hide/display 'Role' text
 // input field as appropriate
@@ -118,10 +126,23 @@ $workshops.on('change', function() {
   $costDiv.html('<h3>Total Cost: $' + totalCost + '</h3>');
 });
 
-// Objects representing payment option divs
 
-const creditDiv = $('#credit-card');
-const bitcoinDiv = $('#bitcoin');
-const paypalDiv = $('#paypal');
+// TODO: on change function with if statements using .hide() method
+$payment.on('change', function() {
+  if($payment.val() === 'credit card') {
+    $bitcoinDiv.hide();
+    $paypalDiv.hide();
+    $creditDiv.show();
+  } else if ($payment.val() === 'bitcoin') {
+    $creditDiv.hide();
+    $paypalDiv.hide();
+    $bitcoinDiv.show();
+  } else if ($payment.val() === 'paypal') {
+    $creditDiv.hide();
+    $bitcoinDiv.hide();
+    $paypalDiv.show();
+  } else {
 
-//// TODO: on change function with if statements using .hide() method
+  }
+
+});
