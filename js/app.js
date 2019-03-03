@@ -1,48 +1,54 @@
-//script file
-// jQuery objects
+//Progressive enhancement form validation for Full Stack Conference registration
+
 const $name = $('#name');
+const $creditCardString = $('#cc-num');
 const $email = $('#mail');
 const $jobTitle = $("#title");
 const $shirtDesign = $('#design');
 const $colorDiv = $('#colors-js-puns');
-const $shirtColors = $('#color').children();
 const $workshopFieldset = $('.activities');
-const $activitiesLegend = $('.activities legend');
+const $workshopsLegend = $('.activities legend');
 const $workshops = $workshopFieldset.children().children();
 const $payment = $('#payment');
-const $creditCardString = $('#cc-num');
+const $creditDiv = $('#credit-card');
 const $zipCode = $('#zip');
 const $cvv = $('#cvv');
-const $creditDiv = $('#credit-card');
-const $bitcoinDiv = $('#bitcoin');
-const $paypalDiv = $('#paypal');
-
+const $submit = $('button');
+// Regular expressions for form validation
 const nameRegex = /.+/;
 const emailRegex = /^\S+@\S+\.\S+$/;
 const creditcardRegex = /^\d{13,16}$/g;
 const zipcodeRegex = /^\d{5}$/;
 const cvvRegex = /^\d{3}$/;
-let regexArray = [nameRegex, emailRegex];
-let fieldValidatorArray = [$name, $email];
+// Arrays to hold fields and reg. expressions for validation based on user
+// selections
+let regexArray = [];
+let fieldValidatorArray = [];
+// Array holds 'checked' if any workshopsare selected
 let workshopChecked = [];
-const $submit = $('button');
 
+// Append instructions for entering email address
 const $mailLabel = $( "[for='mail']");
 $mailLabel.append('<h5 id="mail-error">must be formatted: string@string.string</h5>');
 const $mailError = $('#mail-error');
 
-$activitiesLegend.append('<h6 id="workshops-error">Select at least one workshop</h6>')
+// Append instructions for signing up for workshops
+$workshopsLegend.append('<h6 id="workshops-error">Select at least one workshop</h6>')
 const $workshopsError = $('#workshops-error');
-$workshopsError.hide();
+const $bitcoinDiv = $('#bitcoin');
+const $paypalDiv = $('#paypal');
 
-// On page load, hide other 'Role' text input field in 'Basic' fieldset and add
-// total cost field at the end of workshops section. Hide t-shirt design. Hide
-//the bitcoin and PayPal divs
+// Append total cost field to workshops fieldset
+$workshopFieldset.append('<div id="total_cost"><h3>Total Cost: $0</h3></div>');
+
+// On page load: hide other 'Role' text input field in 'Basic' fieldset.
+// hide workshop signup instructions
+// hide t-shirt design. Hide the bitcoin and PayPal divs.
 $jobTitle.next().hide();
 $jobTitle.next().next().hide();
 $colorDiv.hide();
 $mailError.hide();
-$workshopFieldset.append('<div id="total_cost"><h3>Total Cost: $0</h3></div>');
+$workshopsError.hide();
 $bitcoinDiv.hide();
 $paypalDiv.hide();
 
@@ -60,9 +66,8 @@ $jobTitle.on('change', function(){
 
 // When shirt design selection is changed, show color options available for the
 // selected design
-// TODO: when a design selection is made then color is changed -- design
-// options don't change until the dropdown is selected.
 $shirtDesign.on('change', function(){
+  const $shirtColors = $('#color').children();
   $colorDiv.show();
   $shirtColors.show();
   for (i = 1; i < $shirtColors.length; i++) {
@@ -130,7 +135,7 @@ $workshops.on('change', function() {
         $jsLibs.prop("disabled", true);
       }
   }
-
+  // Check if workshops are checked and add price to totalCost displayed on page
   function isChecked(workshop, price) {
     if (workshop.prop('checked')) {
       totalCost += price;
@@ -148,46 +153,28 @@ $workshops.on('change', function() {
   $costDiv.html('<h3>Total Cost: $' + totalCost + '</h3>');
 });
 
-// TODO: on change function with if statements using .hide() method
+// Display/hide payment information based on user input
 $payment.on('change', function() {
-  let regexArray = [nameRegex, emailRegex];
-  let fieldValidatorArray = [$name, $email];
   if($payment.val() === 'credit card') {
     $bitcoinDiv.hide();
     $paypalDiv.hide();
     $creditDiv.show();
-    regexArray.push(creditcardRegex);
-    regexArray.push(zipcodeRegex);
-    regexArray.push(cvvRegex);
-    fieldValidatorArray.push($creditCardString);
-    fieldValidatorArray.push($zipCode);
-    fieldValidatorArray.push($cvv);
 
   } else if ($payment.val() === 'bitcoin') {
     $creditDiv.hide();
     $paypalDiv.hide();
     $bitcoinDiv.show();
-    regexArray.pop(creditcardRegex);
-    regexArray.pop(zipcodeRegex);
-    regexArray.pop(cvvRegex);
-    fieldValidatorArray.pop($creditCardString);
-    fieldValidatorArray.pop($zipCode);
-    fieldValidatorArray.pop($cvv);
 
   } else if ($payment.val() === 'paypal') {
     $creditDiv.hide();
     $bitcoinDiv.hide();
     $paypalDiv.show();
-    regexArray.pop(creditcardRegex);
-    regexArray.pop(zipcodeRegex);
-    regexArray.pop(cvvRegex);
-    fieldValidatorArray.pop($creditCardString);
-    fieldValidatorArray.pop($zipCode);
-    fieldValidatorArray.pop($cvv);
+
   } else {
   }
 });
 
+// Real time error message for invalid email input
 $email.on('keypress',function() {
   $email.val() === '';
   if (! emailRegex.test($email.val())) {
@@ -197,9 +184,32 @@ $email.on('keypress',function() {
   }
 });
 
+// When submit button is clicked, two arrays are generated - one containing
+// objects to be validated and one containing regular expressions to validate
+// objects. The arraya are iterated and each pair evaluated in this function. If
+// user inputs are invalid, the form is not submitted.
+function regexTester (regex, string) {
+  if(! regex.test(string.val())) {
+    string.css('border-color', 'red');
+    event.preventDefault();
+  }
+}
+
+// Evaluate validity of user inputs.
 $submit.on('click', function() {
-  // Reset backgrounds if they have been turned red proviously
-  $activitiesLegend.css('background-color', '');
+  // Reset background colors and arrays.
+  $creditCardString.css('border-color', '');
+  $cvv.css('border-color', '');
+  $zipCode.css('border-color', '');
+  $name.css('border-color', '');
+  $email.css('border-color', '');
+  $payment.css('border-color', '');
+  $workshopsLegend.css('color', '');
+
+  regexArray = [];
+  fieldValidatorArray = [];
+
+// Check if any workships are selected.
   workshopChecked = [];
   for (i = 0; i < $workshops.length; i ++) {
     if ($workshops.eq(i).prop('checked')) {
@@ -207,25 +217,39 @@ $submit.on('click', function() {
     }
   }
 
+// If no workshops are selected, prevent form from being submitted and display
+// error
   if(! workshopChecked.includes('checked')) {
-    $activitiesLegend.css('background-color', 'red');
+    $workshopsLegend.css('color', 'red');
     $workshopsError.show();
     event.preventDefault();
   } else {
     $workshopsError.hide();
   }
 
-  function regexTester (regex, string) {
-    return regex.test(string.val());
-  }
+// Define the array to be sent to regex tester based on payment method
+// for non-credit card selections
+  if($payment.val() === 'credit card') {
+    regexArray = [nameRegex, emailRegex, creditcardRegex, zipcodeRegex, cvvRegex];
+    fieldValidatorArray = [$name, $email, $creditCardString, $zipCode, $cvv];
 
-  for (i = 0; i < regexArray.length; i ++) {
-    // Reset backgrounds if they have been turned red proviously
-    fieldValidatorArray[i].css('border-color', '');
-    if(! regexTester(regexArray[i], fieldValidatorArray[i])) {
-      fieldValidatorArray[i].css('border-color', 'red');
-      event.preventDefault();
+    for (i = 0; i < regexArray.length; i ++) {
+      regexTester(regexArray[i], fieldValidatorArray[i]);
+    }
+
+  } else if ($payment.val() === 'paypal' || $payment.val() === 'bitcoin') {
+    regexArray = [nameRegex, emailRegex];
+    fieldValidatorArray = [$name, $email];
+
+    for (i = 0; i < regexArray.length; i ++) {
+      regexTester(regexArray[i], fieldValidatorArray[i]);
+    }
+  } else if ($payment.val() === 'select_method') {
+    regexArray = [nameRegex, emailRegex];
+    fieldValidatorArray = [$name, $email];
+    $payment.css('border-color', 'red');
+    for (i = 0; i < regexArray.length; i ++) {
+      regexTester(regexArray[i], fieldValidatorArray[i]);
     }
   }
-
 });
