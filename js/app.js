@@ -10,6 +10,8 @@ const $workshopFieldset = $('.activities');
 const $workshopsLegend = $('.activities legend');
 const $workshops = $workshopFieldset.children().children();
 const $payment = $('#payment');
+// Set credit card as default payment method
+$payment.val('credit card');
 const $creditDiv = $('#credit-card');
 const $zipCode = $('#zip');
 const $cvv = $('#cvv');
